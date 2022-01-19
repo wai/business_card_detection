@@ -29,11 +29,11 @@ from scipy.ndimage.filters import rank_filter
 def dilate(ary, N, iterations):
     """Dilate using an NxN '+' sign shape. ary is np.uint8."""
     kernel = np.zeros((N, N), dtype=np.uint8)
-    kernel[(N - 1) / 2, :] = 1
+    kernel[int((N - 1) / 2), :] = 1
     dilated_image = cv2.dilate(ary / 255, kernel, iterations=iterations)
 
     kernel = np.zeros((N, N), dtype=np.uint8)
-    kernel[:, (N - 1) / 2] = 1
+    kernel[:, int((N - 1) / 2)] = 1
     dilated_image = cv2.dilate(dilated_image, kernel, iterations=iterations)
     return dilated_image
 
@@ -120,7 +120,8 @@ def find_components(edges, max_components=16):
     while count > 16:
         n += 1
         dilated_image = dilate(edges, N=3, iterations=n)
-        _, contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        dilated_image = np.array(dilated_image, np.uint8)
+        contours, hierarchy = cv2.findContours(dilated_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         count = len(contours)
     # print dilation
     # Image.fromarray(edges).show()
@@ -163,12 +164,11 @@ def find_optimal_components_subset(contours, edges):
             # ^^^ very ad-hoc! make this smoother
             remaining_frac = c['sum'] / (total - covered_sum)
             new_area_frac = 1.0 * crop_area(new_crop) / crop_area(crop) - 1
-            if new_f1 > f1 or (
-                            remaining_frac > 0.25 and new_area_frac < 0.15):
-                print '%d %s -> %s / %s (%s), %s -> %s / %s (%s), %s -> %s' % (
+            if new_f1 > f1 or (remaining_frac > 0.25 and new_area_frac < 0.15):
+                print('%d %s -> %s / %s (%s), %s -> %s / %s (%s), %s -> %s' % (
                     i, covered_sum, new_sum, total, remaining_frac,
                     crop_area(crop), crop_area(new_crop), area, new_area_frac,
-                    f1, new_f1)
+                    f1, new_f1))
                 crop = new_crop
                 covered_sum = new_sum
                 del c_info[i]
@@ -210,7 +210,7 @@ def pad_crop(crop, contours, edges, border_contour, pad_px=15):
         int_area = crop_area(intersect_crops(crop, this_crop))
         new_crop = crop_in_border(union_crops(crop, this_crop))
         if 0 < int_area < this_area and crop != new_crop:
-            print '%s -> %s' % (str(crop), str(new_crop))
+            print('%s -> %s' % (str(crop), str(new_crop)))
             changed = True
             crop = new_crop
 
@@ -239,9 +239,9 @@ def process_image_without_save(im, scale=1):
     im = cv2.bilateralFilter(im, 9, 25, 175)
     edges = cv2.Canny(im, 100, 200)
     # TODO: dilate image _before_ finding a border. This is crazy sensitive!
-    _, contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     borders = find_border_components(contours, edges)
-    borders.sort(key=lambda (i, x1, y1, x2, y2): (x2 - x1) * (y2 - y1))
+    borders.sort(key=lambda i, x1, y1, x2, y2: (x2 - x1) * (y2 - y1))
 
     border_contour = None
     if len(borders):
@@ -258,7 +258,7 @@ def process_image_without_save(im, scale=1):
 
     contours = find_components(edges)
     if len(contours) == 0:
-        # print '%s -> (no text!)' % path
+        # print('%s -> (no text!)' % path)
         return
 
     crop = find_optimal_components_subset(contours, edges)
@@ -293,7 +293,7 @@ def process_image(path, out_path):
     # TODO: dilate image _before_ finding a border. This is crazy sensitive!
     contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     borders = find_border_components(contours, edges)
-    borders.sort(key=lambda (i, x1, y1, x2, y2): (x2 - x1) * (y2 - y1))
+    borders.sort(key=lambda i, x1, y1, x2, y2: (x2 - x1) * (y2 - y1))
 
     border_contour = None
     if len(borders):
@@ -310,7 +310,7 @@ def process_image(path, out_path):
 
     contours = find_components(edges)
     if len(contours) == 0:
-        print '%s -> (no text!)' % path
+        print('%s -> (no text!)' % path)
         return
 
     crop = find_optimal_components_subset(contours, edges)
@@ -327,11 +327,11 @@ def process_image(path, out_path):
     # draw.text((50, 50), path, fill='red')
     # orig_im.save(out_path)
     # im.show()
-    print 'crop', crop
+    print('crop', crop)
+
     text_im = orig_im.crop(crop)
     text_im.save(out_path)
-    print '%s -> %s' % (path, out_path)
-
+    print('%s -> %s' % (path, out_path))
 
 # if __name__ == '__main__':
 #     if len(sys.argv) == 2 and '*' in sys.argv[1]:

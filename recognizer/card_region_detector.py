@@ -10,7 +10,7 @@ def detect(img):
     card = cv2.Canny(card, 50, 150)
 
     contours, _ = cv2.findContours(card, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print len(contours)
+    print(len(contours))
 
     cv2.drawContours(img, contours, -1, (0, 0, 255), 2)
 
@@ -22,7 +22,7 @@ def crop_text_region(img):
 
 if __name__ == '__main__':
     SIZE = 750
-    path = 'samples/bc_ref/r_1.jpg'
+    path = '../samples/bc_ref/r_1.jpg'
     img = cv2.imread(path)
 
     img = cv2.resize(img, (SIZE, SIZE), None)

@@ -29,7 +29,7 @@ def similar(a, b):
 
 
 def scan_line(line, dict):
-    sub_tokens = [tok.decode('utf8').lower() for tok in line.split()]
+    sub_tokens = [tok.lower() for tok in line.split()]
     best_guess, best_name = 0, ''
 
     for sub_token in sub_tokens:
@@ -86,7 +86,7 @@ def find_best_guessed_name(tokens):
 
 
 def is_name(token):
-    sub_tokens = [tok.decode('utf8').lower() for tok in token.split()]
+    sub_tokens = [tok.lower() for tok in token.split()]
 
     for sub_token in sub_tokens:
         if is_en_name(sub_token) or is_jp_name(sub_token) or is_vn_name(sub_token):

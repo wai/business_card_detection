@@ -76,7 +76,7 @@ def extract_2(img_path):
     global DEBUG
     if DEBUG:
         pil_img.show()
-        print 'txt', txt
+        print('txt', txt)
         cv2.rectangle(resized_img, (cropped[0], cropped[1]), (cropped[2], cropped[3]), (0, 255, 0), 1)
         cv2.imshow('resized', resized_img)
 
@@ -99,7 +99,7 @@ def tokenizer(txt):
 if __name__ == '__main__':
     # sample_path = 'business_cards/Reference/011.jpg'
     # sample_path = '010.jpg'
-    sample_path = 'samples/bc_ref/r_1.jpg'
+    sample_path = '../samples/bc_ref/r_1.jpg'
     # extract_2(sample_path)
     # sample_path = 'samples/BC_5.jpg'
 
@@ -108,4 +108,3 @@ if __name__ == '__main__':
     print(' ' * 30)
     print(' * ' * 30)
     print(jsonpickle.encode(contact))
-
